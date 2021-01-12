@@ -1,0 +1,232 @@
+<template>
+  <div class="ticket-report-wrapper">
+    <MTableHeader class="table-stripped" :mTableProperty="mTableProperty" :headerArray="ticketReportHeader" :data="datasetContentVideo" :offset="offset" @filters="actTicketFilter($event)"/>
+    <!-- <MPagination class="tw__pagination"
+      :totalPages="3"
+      :per-page="3"
+      :currentPage="currentPage"
+      @pagechanged="onPageChange"
+      :hidePrevious="true"/> -->
+  </div>
+</template>
+
+<script>
+import {MTableHeader, MPagination} from 'mobiotics-dynamic-components-vue'
+import * as apidata from '@/components/assets/ticketReport.js'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
+import { mVMixin } from '@/mixins.js'
+export default {
+  name: 'TicketReport',
+  data () {
+    return {
+      ticketReportHeader: [],
+      ticketReportData: [],
+      offset: 0,
+      ticketFilter: [],
+      currentPage: 1,
+      mTableProperty: {},
+      datasetContentVideo: []
+    }
+  },
+  computed: {
+    ...mapGetters(['getListAllJobTranscode', 'getListFilteredJobTranscode'])
+  },
+  watch: {
+    getListAllJobTranscode() {
+      console.log('getListAllJobTranscode', this.getListAllJobTranscode)
+      this.getContentVideoTranscodeData();
+    }
+  },
+  methods: {
+    ...mapMutations(['setListFilteredJobTranscode']),
+    ...mapActions(['actTranscodeData']),
+    actTicketFilter (data) {
+      let obj = {};
+      let dataset = []
+      if (data.createdFromQuery) {
+         data.createdFromQuery = this.apiDateFormat(data.createdFromQuery)
+      }
+      obj = this.actMakeObjectToParams(data)
+      this.actTranscodeData(obj).then((res) => {
+        if (res && res.data) {
+            dataset = this.actMakeSizeConversion(res.data);
+        } 
+
+     this.getContentVideoTranscodeData(dataset);
+    }, (error) => {
+      console.log(error);
+    })
+    },
+    getContentVideoTranscodeData(database=null) {
+      console.log("1", database)
+      if (!database) {
+        database = this.getListAllJobTranscode
+      }
+      
+      this.datasetContentVideo = database.filter((transcodeItem) => {
+          if (transcodeItem.contenttype == 'CONTENT' && transcodeItem.filetype == 'AUDIO') {
+            return transcodeItem;
+          }
+        })
+
+       console.log("2", this.datasetContentVideo)
+    },
+    onPageChange (val) {
+      this.currentPage = val
+    },
+    filterDataset (arr) {
+      let localJobs = this.getListFilteredJobTranscode.filter((item) => {
+        if (item.filetype !== 'AUDIO') {
+            return item;
+        }
+      });
+      localJobs = [...localJobs, ...arr]
+      this.setListFilteredJobTranscode(localJobs);       
+    }
+  },
+  components: {
+    MTableHeader,
+    MPagination
+  },
+  mounted () {
+    this.getContentVideoTranscodeData();
+  },
+  created () {
+    this.ticketReportData = apidata.ticketReport
+    this.ticketReportHeader = [
+      {
+        type: 'md1',
+        textHeader: '#',
+        filterType: false,
+        valueType: 'index',
+        value: 1
+      },
+      {
+        type: 'lg5',
+        textHeader: 'PREPROCESS ID',
+        valueType: 'column',
+        value: 'preprocessid',
+        filterType: 'search',
+        filterData: {
+          label: 'Ticket ID',
+          showfilter: false,
+          filterName: 'jobid',
+          default: ''
+        }
+      },
+      {
+        type: 'lg5',
+        textHeader: 'ORIGINALFILENAME',
+        valueType: 'column',
+        value: 'originalfilename',
+        filterType: 'search',
+        filterData: {
+          label: 'Title',
+          showfilter: false,
+          filterName: 'originalfilename',
+          default: ''
+        }
+      },
+       {
+        type: 'lg5',
+        textHeader: 'MIME TYPE',
+        valueType: 'column',
+        value: 'mimetype',
+        filterType: 'dropDown',
+        filterData: {
+          label: 'MIME type',
+          showfilter: false,
+          filterName: 'mimetype',
+          default: 'all',
+          valueOption: [
+            {text: 'All', value: 'all'},
+            {text: 'video/mp4', value: 'VIDEO'},
+            {text: 'image/png', value: 'image/png'}
+          ]
+        }
+      },
+      {
+        type: 'lg5',
+        textHeader: 'SIZE',
+        valueType: 'column',
+        value: 'size',
+      },
+      {
+        type: 'lg5',
+        textHeader: 'DURATION',
+        valueType: 'column',
+        value: 'duration',
+      },
+      {
+        type: "lg5",
+        textHeader: "REPORT",
+        valueType: "column",
+        value: (row, index) => {
+          let fileList = this.datasetContentVideo[index].report
+            ? JSON.parse(this.datasetContentVideo[index].report)
+            : null;
+
+          if (fileList && fileList.AUDIO && fileList.AUDIO.length) {
+            fileList =
+              fileList.AUDIO.length === 1
+                ? `${fileList.AUDIO.length} TRACK`
+                : `${fileList.AUDIO.length} TRACKS`;
+          } else {
+            return null;
+          }
+          return fileList;
+        },
+      },
+      {
+        type: 'lg5',
+        textHeader: 'CREATE ON',
+        valueType: 'dateTime',
+        value: 'starttime',
+        filterType: 'dateRange',
+        filterData: {
+          label: 'Created',
+          showfilter: false,
+          filterName: 'createdFromQuery',
+          filterName2: 'createdToQuery',
+          default: '',
+          dofilter: false
+        }
+      },
+    {
+      type: 'md1',
+      textHeader: 'SELECT',
+      valueType: 'checkbox',
+      value: 'preprocessid',
+      checkArr: {
+      checked: (checkedArr) => {
+        console.log(checkedArr)
+        this.filterDataset(checkedArr);
+      }
+    }
+    }
+    ]
+  },
+  mixins: [mVMixin]
+}
+</script>
+
+<style scoped lang="scss">
+  .ticket-report-wrapper {
+    .tw__pagination {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      padding: 10px 0 0;
+    }
+    /deep/ .table-wrapper {
+      .flex-table {
+        &.header {
+          font-weight: inherit;
+          div {
+            font-family: var(--font-medium);
+          }
+        }
+      }
+    }
+  }
+</style>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="13px" viewBox="0 0 16 13" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: sketchtool 63.1 (101010) - https://sketch.com -->
+    <title>Back</title>
+    <desc>Created with sketchtool.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="01vCRM/Provider/Tickets/View" transform="translate(-138.000000, -112.000000)" fill="#303B4A">
+            <g id="Group-2" transform="translate(102.058892, 79.743094)">
+                <path d="M45.2440005,31.5307463 L45.2433615,42.6337463 L48.8015687,39.0760874 L50.2671952,40.5417139 L44.2342774,46.57341 L44.2053615,46.5347463 L44.175529,46.5760874 L38.1603615,40.5416684 L39.6259881,39.0760419 L43.1593615,42.6097463 L43.1712916,31.5307463 L45.2440005,31.5307463 Z" id="ic_back" transform="translate(44.213778, 39.053417) rotate(90.000000) translate(-44.213778, -39.053417) "></path>
+            </g>
+        </g>
+    </g>
+</svg>
